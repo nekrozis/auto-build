@@ -20,13 +20,13 @@ jobs:
           fetch-depth: 0  # 拉取完整历史以支持标签检出
 
       - name: Checkout to Tag 11.5
-        run: git checkout tags/11.5 -b build-11.5
+        run: git checkout 11.5
 
       - name: Clone LOVE Library at Tag 11.5
         run: |
           git clone https://github.com/love2d/love libs/love
           cd libs/love
-          git checkout tags/11.5
+          git checkout 11.5
 
       - name: Configure with CMake
         run: |
