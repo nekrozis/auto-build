@@ -25,9 +25,10 @@ jobs:
     - name: build nekoray C++
       run: |
         choco install ninja
+        choco install busybox
         git clone https://github.com/MatsuriDayo/nekoray.git --recursive
         cd nekoray
-        ${{ github.workspace }}/busybox.exe ./libs/build_deps_all.sh
+        busybox ./libs/build_deps_all.sh
         mkdir build
         cd build
         cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${QT_ROOT_DIR } ..
