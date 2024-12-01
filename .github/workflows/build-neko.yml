@@ -1,0 +1,28 @@
+name: build-neko
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install Qt 6.7.3
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.7.3'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+        dir: '${{ github.workspace }}/Qt'
+        set-env: 'true'
+        add-tools-to-path: 'true'
+
+    - name: Check Qt version
+      run: |
+        qt --version
+
