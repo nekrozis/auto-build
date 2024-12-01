@@ -22,7 +22,6 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2019_64'
-        dir: '${{ github.workspace }}/Qt'
         set-env: 'true'
         add-tools-to-path: 'true'
  
@@ -35,5 +34,15 @@ jobs:
         busybox sh ./libs/build_deps_all.sh
         mkdir build
         cd build
-        cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ github.workspace }}/Qt/Qt/6.7.3/msvc2019_64" ..
+        cmake -GNinja -DQT_VERSION_MAJOR=6 -DCMAKE_BUILD_TYPE=Release ..
         ninja
+        mkdir deploy
+        copy nekobox.exe deploy
+        windeployqt deploy\nekobox.exe
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with: 
+        name: nekobox
+        path: '${{ github.workspace }}/nekoray/build/deploy/'
+
