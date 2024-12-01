@@ -3,13 +3,41 @@ name: build-neko
 on:
   workflow_dispatch:
 
-defaults:
-  run:
-    shell: cmd
+
 
 jobs:
-  build:
+
+  build-core:
     runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: pwsh
+    
+    steps:
+    - name: 'Build Core'
+      run: |
+        $env:CHERE_INVOKING = 'yes'
+        $env:MSYSTEM = 'CLANG64'
+        $env:MSYS2_PATH_TYPE = 'inherit'
+        git clone https://github.com/MatsuriDayo/nekoray.git --recursive
+        cd nekoray
+        C:\msys64\usr\bin\bash.exe -lc "./libs/get_source.sh"
+        C:\msys64\usr\bin\bash.exe -lc "GOOS=windows GOARCH=amd64 bash libs/build_go.sh"
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with: 
+          name: nekobox-core
+          path: '${{ github.workspace }}/nekoray/deployment/windows64/'
+
+
+  build-ui:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: cmd
 
     steps:
     - name: Checkout code
