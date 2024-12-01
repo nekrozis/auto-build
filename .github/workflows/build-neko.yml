@@ -5,7 +5,7 @@ on:
 
 defaults:
   run:
-    shell: cmd.exe
+    shell: cmd
 
 jobs:
   build:
