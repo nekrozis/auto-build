@@ -9,8 +9,8 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
-
+      uses: actions/checkout@v3   
+    
     - name: Install Qt 6.7.3
       uses: jurplel/install-qt-action@v4
       with:
@@ -21,8 +21,13 @@ jobs:
         dir: '${{ github.workspace }}/Qt'
         set-env: 'true'
         add-tools-to-path: 'true'
-
-    - name: Check Qt version
+ 
+    - name: build nekoray C++
       run: |
-        qt --version
-
+        git clone https://github.com/MatsuriDayo/nekoray.git --recursive
+        cd nekoray
+        ${{ github.workspace }}/busybox.exe ./libs/build_deps_all.sh
+        mkdir build
+        cd build
+        cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${QT_ROOT_DIR } ..
+        ninja
