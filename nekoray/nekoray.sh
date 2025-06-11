@@ -7,16 +7,9 @@ pushd nekoray
 git checkout $NEKORAY_VERSION
 popd
 
-# mkdir protoc
-# curl -L "https://github.com/protocolbuffers/protobuf/releases/download/${PROTOBUF_VERSION}/protoc-${PROTOBUF_VERSION#v}-win64.zip" -o protoc/protoc.zip
-# unzip protoc/protoc.zip -d protoc/
-# rm deps/bin/* -f
-# cp protoc/bin/protoc.exe deps/bin/
-
 mkdir -p nekoray/libs/deps
 mv deps nekoray/libs/deps/built
 ls -l nekoray/libs/deps/built
-nekoray/libs/deps/built/bin/protoc.exe --version
 
 mkdir nekoray/build
 pushd nekoray/build

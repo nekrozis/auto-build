@@ -80,10 +80,11 @@ jobs:
     - name: Build Nekoray Core
       run: ./nekoray/core.sh
 
+    - name: Deploy Prep
+      run: ./nekoray/deploy.sh
+
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       with:
         name: nekoray-build
-        path: |
-          build/nekoray/build
-          build/core
+        path: deploy/nekoray
