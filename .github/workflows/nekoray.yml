@@ -10,7 +10,7 @@ on:
       protobuf_version:
         description: 'Protobuf version'
         required: true
-        default: 'v31.0'
+        default: 'v31.1'
       nekoray_version:
         description: 'Nekoray version to build'
         required: true
