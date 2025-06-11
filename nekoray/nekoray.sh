@@ -7,11 +7,11 @@ pushd nekoray
 git checkout $NEKORAY_VERSION
 popd
 
-mkdir protoc
-curl -L "https://github.com/protocolbuffers/protobuf/releases/download/${PROTOBUF_VERSION}/protoc-${PROTOBUF_VERSION#v}-win64.zip" -o protoc/protoc.zip
-unzip protoc/protoc.zip -d protoc/
-rm deps/bin/* -f
-cp protoc/bin/protoc.exe deps/bin/
+# mkdir protoc
+# curl -L "https://github.com/protocolbuffers/protobuf/releases/download/${PROTOBUF_VERSION}/protoc-${PROTOBUF_VERSION#v}-win64.zip" -o protoc/protoc.zip
+# unzip protoc/protoc.zip -d protoc/
+# rm deps/bin/* -f
+# cp protoc/bin/protoc.exe deps/bin/
 
 mkdir -p nekoray/libs/deps
 mv deps nekoray/libs/deps/built
@@ -21,7 +21,13 @@ nekoray/libs/deps/built/bin/protoc.exe --version
 mkdir nekoray/build
 pushd nekoray/build
 
-cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DQT_VERSION_MAJOR=6 -DCMAKE_CXX_FLAGS="-static -DNDEBUG -s" ..
+cmake .. -GNinja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DQT_VERSION_MAJOR=6 \
+    -DCMAKE_CXX_FLAGS="-static -DNDEBUG -s"  \
+    -DCMAKE_THREAD_LIBS_INIT="-l:libwinpthread.a"
+
 cmake --build . --parallel
 
 popd
