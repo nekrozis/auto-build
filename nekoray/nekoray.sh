@@ -9,6 +9,8 @@ popd
 
 mkdir -p nekoray/libs/deps
 mv deps nekoray/libs/deps/built
+ls -l nekoray/libs/deps/built
+nekoray/libs/deps/built/bin/protoc.exe --version
 
 mkdir nekoray/build
 pushd nekoray/build
