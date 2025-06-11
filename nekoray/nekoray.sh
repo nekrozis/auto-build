@@ -9,7 +9,7 @@ popd
 
 mkdir protoc
 curl -L "https://github.com/protocolbuffers/protobuf/releases/download/${PROTOBUF_VERSION}/protoc-${PROTOBUF_VERSION#v}-win64.zip" -o protoc/protoc.zip
-unzip protoc/protoc.zip
+unzip protoc/protoc.zip -d protoc/
 rm deps/bin/* -f
 cp protoc/bin/protoc.exe deps/bin/
 
