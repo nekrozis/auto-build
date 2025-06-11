@@ -1,0 +1,25 @@
+name: "Build Nekoray"
+
+on:
+  workflow_dispatch:
+    inputs:
+      qt_version:
+        description: 'Qt version'
+        required: true
+        default: '6.9.0'
+      protobuf_version:
+        description: 'Protobuf version'
+        required: true
+        default: 'v31.0'
+      nekoray_version:
+        description: 'Nekoray version to build'
+        required: true
+        default: 'abe2dc5'
+
+jobs:
+  build:
+    runs-on: windows-2025
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
