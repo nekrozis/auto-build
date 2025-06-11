@@ -1,5 +1,7 @@
 pushd build
 
+echo $PROTOBUF_VERSION
+
 mkdir deps
 INSTALL_PREFIX=$PWD/deps
 git clone  https://github.com/protocolbuffers/protobuf.git \
