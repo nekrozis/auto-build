@@ -15,7 +15,8 @@ cmake .. -GNinja \
     -Dprotobuf_BUILD_PROTOBUF_BINARIES=ON \
     -DCMAKE_CXX_STANDARD=17
 
-ninja && ninja install
+cmake --build . --parallel
+ninja install
 
 popd
 popd

@@ -1,0 +1,18 @@
+export CMAKE_PREFIX_PATH=$PWD/build/qt6/build/lib/cmake
+
+pushd build
+
+git clone https://github.com/Mahdi-zarei/nekoray.git -b $NEKORAY_VERSION
+mkdir -p nekoray/libs/deps
+mv deps nekoray/libs/deps/built
+
+mkdir nekoray/build
+pushd nekoray/build
+
+cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DQT_VERSION_MAJOR=6 -DCMAKE_CXX_FLAGS="-static -DNDEBUG -s" ..
+cmake --build . --parallel
+
+popd
+popd
+
+ls -l build/nekoray/build
