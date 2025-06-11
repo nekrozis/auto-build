@@ -5,14 +5,13 @@ pushd build
 git clone https://github.com/Mahdi-zarei/nekoray.git 
 pushd nekoray
 git checkout $NEKORAY_VERSION
+popd
 
 mkdir protoc
 curl -L "https://github.com/protocolbuffers/protobuf/releases/download/${PROTOBUF_VERSION}/protoc-${PROTOBUF_VERSION#v}-win64.zip" -o protoc/protoc.zip
 unzip protoc/protoc.zip
 rm deps/bin/* -f
 cp protoc/bin/protoc.exe deps/bin/
-
-popd
 
 mkdir -p nekoray/libs/deps
 mv deps nekoray/libs/deps/built
