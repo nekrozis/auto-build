@@ -35,7 +35,7 @@ jobs:
 
     - name: Export ImageVersion
       id: Set-ImageVersion
-      run: echo "ImageVersion=$ImageVersion"
+      run: echo "ImageVersion=$ImageVersion" && echo "ImageVersion=$ImageVersion" >> $GITHUB_OUTPUT
 
     # - name: Build Protobuf
     #   run: ./nekoray/protobuf.sh
