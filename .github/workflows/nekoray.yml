@@ -19,7 +19,20 @@ on:
 jobs:
   build:
     runs-on: windows-2025
+    env:
+        CC: gcc.exe
+        CXX: g++.exe
+        QT_VERSION: ${{ github.event.inputs.qt_version }}
+        PROTOBUF_VERSION: ${{ github.event.inputs.protobuf_version }}
+        NEKORAY_VERSION: ${{ github.event.inputs.nekoray_version }}
+    defaults:
+      run:
+        shell: bash
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+    
+    - name: Build Protobuf
+      run: ./nekoray/protobuf.sh
+    
