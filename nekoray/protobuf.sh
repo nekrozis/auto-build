@@ -1,11 +1,8 @@
 pushd build
 
-echo $PROTOBUF_VERSION
-
 mkdir deps
 INSTALL_PREFIX=$PWD/deps
-git clone  https://github.com/protocolbuffers/protobuf.git \
-    --recurse-submodules -b "$PROTOBUF_VERSION" --depth 1 --shallow-submodules
+git clone --recurse-submodules -b $PROTOBUF_VERSION --depth 1 --shallow-submodules https://github.com/protocolbuffers/protobuf.git
 
 mkdir protobuf/build
 pushd protobuf/build
@@ -15,7 +12,7 @@ cmake .. -GNinja \
     -DBUILD_SHARED_LIBS=OFF \
     -Dprotobuf_BUILD_TESTS=OFF \
     -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
-    -Dprotobuf_BUILD_PROTOBUF_BINARIES=ON
+    -Dprotobuf_BUILD_PROTOBUF_BINARIES=ON \
     -DCMAKE_CXX_STANDARD=17
 
 ninja && ninja install
@@ -23,4 +20,4 @@ ninja && ninja install
 popd
 popd
 
-ls -l build/deps/*
+ls -l build/deps/

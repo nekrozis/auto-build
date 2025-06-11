@@ -1,7 +1,6 @@
 name: "Build Nekoray"
 
 on:
-  push:    
   workflow_dispatch:
     inputs:
       qt_version:
@@ -34,6 +33,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
     
-    - name: Build Protobuf
-      run: ./nekoray/protobuf.sh
+    # - name: Build Protobuf
+    #   run: ./nekoray/protobuf.sh
+    
+    - name: Build Qt6 Static
+      run: ./nekoray/qt6-static.sh
     
