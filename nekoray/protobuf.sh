@@ -1,11 +1,11 @@
-cd build
+pushd build
 
 mkdir deps
 INSTALL_PREFIX=$PWD/deps
 git clone --recurse-submodules -b $PROTOBUF_VERSION --depth 1 --shallow-submodules https://github.com/protocolbuffers/protobuf.git
 
 mkdir protobuf/build
-cd protobuf/build
+pushd protobuf/build
 
 cmake .. -GNinja \
     -DCMAKE_BUILD_TYPE=Release \
@@ -17,7 +17,7 @@ cmake .. -GNinja \
 
 ninja && ninja install
 
-cd ../..
-cd ..
+popd
+popd
 
 ls -l build/deps/*
