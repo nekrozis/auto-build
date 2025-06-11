@@ -32,28 +32,28 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-    
+
+    - name: Export ImageVersion
+      id: Set-ImageVersion
+      run: echo "ImageVersion=$ImageVersion" >> $GITHUB_ENV
+
     # - name: Build Protobuf
     #   run: ./nekoray/protobuf.sh
 
-    # - name: Restore Qt cache
-    #   id: restore
-    #   uses: actions/cache/restore@v4
-    #   with:
-    #     path: build/qt6/build
-    #     key: qt-${{ env.ImageVersion }}-${{ env.QT_VERSION }}
+    - name: Restore Qt cache
+      id: restore
+      uses: actions/cache/restore@v4
+      with:
+        path: build/qt6/build
+        key: qt-${{ steps.Set-ImageVersion.outputs.ImageVersion }}-${{ env.QT_VERSION }}
 
-    
-    # - name: Build Qt6 Static
-    #   if: steps.restore.outputs.cache-hit != 'true'
-    #   run: ./nekoray/qt6-static.sh
+    - name: Build Qt6 Static
+      if: steps.restore.outputs.cache-hit != 'true'
+      run: ./nekoray/qt6-static.sh
 
-    # - name: Save Qt cache if cache miss
-    #   if: steps.restore.outputs.cache-hit != 'true'
-    #   uses: actions/cache/save@v4
-    #   with:
-    #     path: build/qt6/build
-    #     key: qt-${{ env.ImageVersion }}-${{ env.QT_VERSION }}
-    
-    - name: Test ImageVersion
-      run: echo ${{ env.ImageVersion }}
+    - name: Save Qt cache if cache miss
+      if: steps.restore.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: build/qt6/build
+        key: qt-${{ steps.Set-ImageVersion.outputs.ImageVersion }}-${{ env.QT_VERSION }}
