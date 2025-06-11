@@ -2,7 +2,8 @@ pushd build
 
 mkdir deps
 INSTALL_PREFIX=$PWD/deps
-git clone --recurse-submodules -b $PROTOBUF_VERSION --depth 1 --shallow-submodules https://github.com/protocolbuffers/protobuf.git
+git clone  https://github.com/protocolbuffers/protobuf.git \
+    --recurse-submodules -b "$PROTOBUF_VERSION" --depth 1 --shallow-submodules
 
 mkdir protobuf/build
 pushd protobuf/build
