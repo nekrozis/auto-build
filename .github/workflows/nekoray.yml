@@ -87,4 +87,3 @@ jobs:
         path: |
           build/nekoray/build
           build/core
-          build/nekoray/libs/deps/built
