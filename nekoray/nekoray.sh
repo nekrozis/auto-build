@@ -2,7 +2,11 @@ export CMAKE_PREFIX_PATH=$PWD/build/qt6/build/lib/cmake
 
 pushd build
 
-git clone https://github.com/Mahdi-zarei/nekoray.git -b $NEKORAY_VERSION
+git clone https://github.com/Mahdi-zarei/nekoray.git 
+pushd nekoray
+git checkout $NEKORAY_VERSION
+popd
+
 mkdir -p nekoray/libs/deps
 mv deps nekoray/libs/deps/built
 
