@@ -1,6 +1,7 @@
 name: "Build Nekoray"
 
 on:
+  push:    
   workflow_dispatch:
     inputs:
       qt_version:
