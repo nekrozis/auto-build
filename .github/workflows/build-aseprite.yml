@@ -34,6 +34,7 @@ jobs:
 
     - name: "Build Aseprite (Release + Full Optimization)"
       run: |
+        del /F /Q C:\Windows\System32\libcrypto-1_1-x64.dll
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=x64
         cd aseprite
         mkdir build
@@ -64,7 +65,7 @@ jobs:
         cd release
         cp ${{ github.workspace }}\aseprite\build\bin\aseprite.exe .
         cp -r ${{ github.workspace }}\aseprite\build\bin\data\ .
-        ${{ github.workspace }}\radare2\bin\r2.bat -e bin.relocs.apply=true -q -w -c '/x 6c 69 62 63 72 79 70 74 6f 2d 31 5f 31 2d 78 36 34 2e 64 6c 6c; wx 6c 69 62 63 72 79 70 74 6f 2e 64 6c 6c 00 00 00 00 00 00 00 00 @ hit0_0' ${{ github.workspace }}\release\aseprite.exe
+        # ${{ github.workspace }}\radare2\bin\r2.bat -e bin.relocs.apply=true -q -w -c '/x 6c 69 62 63 72 79 70 74 6f 2d 31 5f 31 2d 78 36 34 2e 64 6c 6c; wx 6c 69 62 63 72 79 70 74 6f 2e 64 6c 6c 00 00 00 00 00 00 00 00 @ hit0_0' ${{ github.workspace }}\release\aseprite.exe
 
 
     - name: "Upload Build Artifacts"
