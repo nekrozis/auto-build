@@ -25,6 +25,8 @@ codegen-units = 16
 rpath = false
 EOF
 
+rm -rf ./.cargo/
+
 cargo fetch --locked --target x86_64-pc-windows-msvc
 cargo build --profile makepkg --frozen
 
