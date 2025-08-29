@@ -28,4 +28,4 @@ cargo fetch --locked --target x86_64-pc-windows-msvc
 cargo build --profile makepkg --frozen
 
 mkdir ../release
-cp target/release/*.exe ../release/
+cp target/makepkg/*.exe ../release/
