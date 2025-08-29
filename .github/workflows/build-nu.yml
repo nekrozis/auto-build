@@ -1,0 +1,29 @@
+name: build-nu
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: commit to build
+        required: true
+
+jobs:
+  define:
+    runs-on: windows-2025
+    env:
+      COMMIT: ${{ github.event.inputs.commit }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: build
+        run: script/nu.sh
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nu
+          path: release/*
