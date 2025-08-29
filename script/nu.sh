@@ -12,6 +12,7 @@ export RUSTFLAGS="-C target-cpu=x86-64-v3"
 
 cat <<EOF >> ./Cargo.toml
 [profile.makepkg]
+inherits = "release"
 opt-level = 3
 debug = false
 strip = "debuginfo"
