@@ -1,0 +1,90 @@
+name: "Build Nekoray"
+
+on:
+  workflow_dispatch:
+    inputs:
+      qt_version:
+        description: 'Qt version'
+        required: true
+        default: '6.9.0'
+      protobuf_version:
+        description: 'Protobuf version'
+        required: true
+        default: 'v31.1'
+      nekoray_version:
+        description: 'Nekoray version to build'
+        required: true
+        default: 'abe2dc5'
+
+jobs:
+  build:
+    runs-on: windows-2025
+    env:
+        CC: gcc.exe
+        CXX: g++.exe
+        QT_VERSION: ${{ github.event.inputs.qt_version }}
+        PROTOBUF_VERSION: ${{ github.event.inputs.protobuf_version }}
+        NEKORAY_VERSION: ${{ github.event.inputs.nekoray_version }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Export ImageVersion
+      id: Set-ImageVersion
+      run: echo "ImageVersion=$ImageVersion" && echo "ImageVersion=$ImageVersion" >> $GITHUB_OUTPUT
+
+    - name: Restore Protobuf cache
+      id: restore-protobuf
+      uses: actions/cache/restore@v4
+      with:
+        path: build/deps
+        key: protobuf-${{ env.PROTOBUF_VERSION }}-b${{ steps.Set-ImageVersion.outputs.ImageVersion }}
+
+
+    - name: Build Protobuf
+      if: steps.restore-protobuf.outputs.cache-hit != 'true'
+      run: ./nekoray/protobuf.sh
+
+    - name: Save Protobuf cache
+      if: steps.restore-protobuf.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: build/deps
+        key: protobuf-${{ env.PROTOBUF_VERSION }}-b${{ steps.Set-ImageVersion.outputs.ImageVersion }}
+
+    - name: Restore Qt cache
+      id: restore-qt
+      uses: actions/cache/restore@v4
+      with:
+        path: build/qt6/build
+        key: qt-static-${{ env.QT_VERSION }}-b${{ steps.Set-ImageVersion.outputs.ImageVersion }}
+
+    - name: Build Qt6 Static
+      if: steps.restore-qt.outputs.cache-hit != 'true'
+      run: ./nekoray/qt6-static.sh
+
+    - name: Save Qt cache 
+      if: steps.restore-qt.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: build/qt6/build
+        key: qt-static-${{ env.QT_VERSION }}-b${{ steps.Set-ImageVersion.outputs.ImageVersion }}
+
+    - name: Build Nekoray
+      run: ./nekoray/nekoray.sh
+
+    - name: Build Nekoray Core
+      run: ./nekoray/core.sh
+
+    - name: Deploy Prep
+      run: ./nekoray/deploy.sh
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: nekoray-build
+        path: deploy/nekoray
