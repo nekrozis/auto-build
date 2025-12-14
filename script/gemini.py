@@ -125,8 +125,7 @@ def generate_package_json(output_dir, gemini_ver, pty_ver):
         "version": gemini_ver,
         "bin": {"gemini": "gemini.js"},
         "dependencies": {
-            # Use GitHub reference to ensure the correct native build is installed later
-            "node-pty": f"github:microsoft/node-pty#v{pty_ver}"
+            "node-pty": pty_ver
         },
     }
 
