@@ -1,0 +1,38 @@
+name: build-gemini
+
+on:
+  workflow_dispatch:
+    inputs:
+      version: 
+        description: "tag built"
+        required: true
+      node_pty_version:
+        description: "node-pty version"
+        required: true
+  
+jobs:
+  build:
+    name: build-gemini
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set GEMINI_CLI_VERSION
+        run: |
+          Add-Content $env:GITHUB_ENV "GEMINI_CLI_VERSION=${{ github.event.inputs.version }}"
+          Add-Content $env:GITHUB_ENV "NODE_PTY_VERSION=${{ github.event.inputs.node_pty_version }}"
+
+      - name: prepare
+        run: |
+          npm install -g typescript
+          powershell -c "irm bun.sh/install.ps1 | iex"
+          Add-Content $env:GITHUB_PATH "$env:USERPROFILE\.bun\bin"
+
+      - name: build
+        run:  python script/gemini.py
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: gemini-cli.tar.gz

@@ -1,0 +1,75 @@
+name: build-aseprite
+
+on:
+  workflow_dispatch:
+    inputs:
+      version: 
+        description: "commit built"
+        required: true
+      skia-version:
+        description: "skia library version used"
+        default: "m124-08a5439a6b"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+
+    - name: "Download Skia"
+      run: |
+        curl -LJO https://github.com/aseprite/skia/releases/download/${{ github.event.inputs.skia-version }}/Skia-Windows-Release-x64.zip
+        7z x Skia-Windows-Release-x64.zip -oskia
+
+    - name: "Clone Aseprite"
+      run: |
+        git clone https://github.com/aseprite/aseprite.git
+        cd aseprite
+        git checkout ${{ github.event.inputs.version }}
+        git submodule update --init --recursive
+
+    - name: "Build Aseprite (Release + Full Optimization)"
+      run: |
+        del /F /Q C:\Windows\System32\libcrypto-1_1-x64.dll
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=x64
+        cd aseprite
+        mkdir build
+        cd build
+        cmake -G Ninja ^
+          -DCMAKE_BUILD_TYPE=Release ^
+          -DLAF_BACKEND=skia ^
+          -DSKIA_DIR=${{ github.workspace }}\skia ^
+          -DSKIA_LIBRARY_DIR=${{ github.workspace }}\skia\out\Release-x64 ^
+          -DSKIA_LIBRARY=${{ github.workspace }}\skia\out\Release-x64\skia.lib ^
+          -DCMAKE_CXX_FLAGS_RELEASE="/MP /MT /Ox /GL /Ob2 /Oi /Ot /Oy /GF /Gy /DNDEBUG" ^
+          -DCMAKE_C_FLAGS_RELEASE="/MP /MT /Ox /GL /Ob2 /Oi /Ot /Oy /GF /Gy /DNDEBUG" ^
+          -DCMAKE_EXE_LINKER_FLAGS_RELEASE="/LTCG /OPT:REF /OPT:ICF /INCREMENTAL:NO" ^
+          ..
+        cmake --build . --config Release
+    
+    - name: "Binary file post-processing"
+      shell: pwsh
+      run: |
+        mkdir radare2
+        cd radare2
+        curl -LJO https://github.com/radareorg/radare2/releases/download/5.9.8/radare2-5.9.8-w64.zip 
+        7z x radare2-5.9.8-w64.zip 
+        mv .\radare2-5.9.8-w64\* .
+        tree .
+        cd ${{ github.workspace }}
+        mkdir release
+        cd release
+        cp ${{ github.workspace }}\aseprite\build\bin\aseprite.exe .
+        cp -r ${{ github.workspace }}\aseprite\build\bin\data\ .
+        # ${{ github.workspace }}\radare2\bin\r2.bat -e bin.relocs.apply=true -q -w -c '/x 6c 69 62 63 72 79 70 74 6f 2d 31 5f 31 2d 78 36 34 2e 64 6c 6c; wx 6c 69 62 63 72 79 70 74 6f 2e 64 6c 6c 00 00 00 00 00 00 00 00 @ hit0_0' ${{ github.workspace }}\release\aseprite.exe
+
+
+    - name: "Upload Build Artifacts"
+      uses: actions/upload-artifact@v4
+      with:
+        name: aseprite-release
+        path: ${{ github.workspace }}\release

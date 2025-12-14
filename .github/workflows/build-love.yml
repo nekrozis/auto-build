@@ -1,0 +1,39 @@
+name: build-love
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build LOVE
+    runs-on: windows-latest
+
+    steps:
+      - name: Clone Megasource Repository
+        run: |
+          git clone https://github.com/love2d/megasource megasource
+          cd megasource
+          git checkout 11.5 -b build-11.5
+
+      - name: Clone LOVE Library at Tag 11.5
+        run: |
+          cd megasource
+          git clone https://github.com/love2d/love libs/love
+          cd libs/love
+          git checkout 11.5
+
+      - name: Configure with CMake
+        run: |
+          cd megasource
+          cmake -G "Visual Studio 17 2022" -A x64 -S . -B build
+
+      - name: Build LOVE
+        run: |
+          cd megasource
+          cmake --build build --target love/love --config Release
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: love-build
+          path: megasource/build/love/Release/*.exe, megasource/build/love/Release/*.dll

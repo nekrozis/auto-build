@@ -1,0 +1,27 @@
+name: Run CMD Script on Windows
+
+on:
+  workflow_dispatch:
+    inputs:
+      script_url:
+        description: 'The URL of the CMD script to run'
+        required: true
+        type: string
+
+jobs:
+  run-script:
+    runs-on: windows-latest
+    steps:
+      - name: Download CMD Script
+        run: |
+          $url = '${{ github.event.inputs.script_url }}'
+          $scriptPath = "$env:RUNNER_TEMP\script.cmd"
+          Invoke-WebRequest -Uri $url -OutFile $scriptPath
+          Write-Host "=== Script Content ==="
+          Get-Content $scriptPath
+        shell: pwsh
+
+      - name: Run CMD Script
+        run: |
+          cmd /c "$env:RUNNER_TEMP\script.cmd"
+        shell: pwsh

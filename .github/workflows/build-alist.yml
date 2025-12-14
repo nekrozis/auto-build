@@ -1,0 +1,43 @@
+name: build-alist
+
+on:
+  workflow_dispatch:
+    inputs:
+        ui-ver:
+          description: "alist-web version to build"
+          required: true
+        core-ver:
+          description: "alist version to build"
+          required: true
+
+jobs:
+  build:
+    name: Build AList
+    runs-on: windows-latest
+
+    defaults:
+        run:
+          shell: pwsh
+      
+    steps:
+
+        - name: Checkout
+          uses: actions/checkout@v4
+
+        - name: Build Alist
+          run: |
+            choco install busybox -y
+            npm install -g pnpm 
+            git clone --recursive https://github.com/AlistGo/alist-web.git -b ${{ github.event.inputs.ui-ver }}
+            cd alist-web
+            pnpm install
+            pnpm build
+            cd ..
+            busybox ash script\alist.sh ${{ github.event.inputs.ui-ver }} ${{ github.event.inputs.core-ver }}
+        
+
+        - name: Upload build artifacts
+          uses: actions/upload-artifact@v4
+          with: 
+            name: alist
+            path: '${{ github.workspace }}/alist/alist.exe'

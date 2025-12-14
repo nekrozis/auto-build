@@ -1,0 +1,112 @@
+name: build-neko
+
+on:
+  workflow_dispatch:
+    inputs:
+      ver:
+        description: "version to be compiled"
+        required: true
+      qt-ver:
+        description: "qt version"
+        required: true
+
+jobs:
+
+  build-core:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: pwsh
+    
+    steps:
+    - name: 'Build Core'
+      run: |
+        $env:CHERE_INVOKING = 'yes'
+        $env:MSYSTEM = 'CLANG64'
+        $env:MSYS2_PATH_TYPE = 'inherit'
+        git clone https://github.com/MatsuriDayo/nekoray.git --recursive
+        git checkout ${{ github.event.inputs.ver }}
+        cd nekoray
+        C:\msys64\usr\bin\bash.exe -lc "./libs/get_source.sh"
+        C:\msys64\usr\bin\bash.exe -lc "GOOS=windows GOARCH=amd64 bash libs/build_go.sh"
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with: 
+          name: nekobox-core
+          path: '${{ github.workspace }}/nekoray/deployment/windows64/'
+
+
+  build-ui:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3   
+    
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ github.event.inputs.qt-ver }}
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2022_64'
+        set-env: 'true'
+        add-tools-to-path: 'true'
+ 
+    - name: build nekoray C++
+      run: |
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+        choco install busybox -y > nul
+        git clone https://github.com/MatsuriDayo/nekoray.git --recursive
+        cd nekoray
+        busybox sh ./libs/build_deps_all.sh
+        mkdir build
+        cd build
+        cmake -GNinja -DQT_VERSION_MAJOR=6 -DCMAKE_BUILD_TYPE=Release ..
+        ninja
+        mkdir deploy
+        copy nekobox.exe deploy
+        windeployqt deploy\nekobox.exe
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with: 
+        name: nekobox-ui
+        path: '${{ github.workspace }}/nekoray/build/deploy/'
+
+  assemble:
+    name: "Assemble the components"
+    runs-on: windows-latest
+    needs: [build-core, build-ui]
+    steps:
+      - name: Download UI
+        uses: actions/download-artifact@v4
+        with:
+          name: nekobox-ui
+          path: ${{ github.workspace }}/nekobox
+      - name: Download Core
+        uses: actions/download-artifact@v4
+        with:
+          name: nekobox-core
+          path: ${{ github.workspace }}/nekobox
+      - name: Assemble Dist
+        run: |
+          ls nekobox
+          choco install -y wget | Out-Null
+          cd nekobox
+          rm d3dcompiler*, dxcompiler.dll, dxil.dll, opengl32sw.dll, vc_redist.x64.exe
+          rm updater.exe
+          wget https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db
+          wget https://github.com/SagerNet/sing-geosite/releases/latest/download/geosite.db
+      - name: Upload Dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: nekobox
+          path: '${{ github.workspace }}/nekobox'
+
