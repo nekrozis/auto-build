@@ -1,38 +1,37 @@
-name: build-gemini
+name: Build Gemini CLI Bundle
 
 on:
   workflow_dispatch:
-    inputs:
-      version: 
-        description: "tag built"
-        required: true
-      node_pty_version:
-        description: "node-pty version"
-        required: true
-  
+
 jobs:
   build:
-    name: build-gemini
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set GEMINI_CLI_VERSION
-        run: |
-          Add-Content $env:GITHUB_ENV "GEMINI_CLI_VERSION=${{ github.event.inputs.version }}"
-          Add-Content $env:GITHUB_ENV "NODE_PTY_VERSION=${{ github.event.inputs.node_pty_version }}"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-      - name: prepare
+      - name: Install dependencies
         run: |
-          npm install -g typescript
-          powershell -c "irm bun.sh/install.ps1 | iex"
-          Add-Content $env:GITHUB_PATH "$env:USERPROFILE\.bun\bin"
+          pip install requests
 
-      - name: build
-        run:  python script/gemini.py
+      - name: Run Build Script
+        id: build_script
+        run: python script/gemini.py
+
+      - name: Log Versions
+        run: |
+          echo "Captured Gemini Version: ${{ steps.build_script.outputs.GEMINI_VERSION }}"
+          echo "Captured VS Code Version: ${{ steps.build_script.outputs.VSCODE_VERSION }}"
+          echo "Captured node-pty Version: ${{ steps.build_script.outputs.NODEPTY_VERSION }}"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          path: gemini-cli.tar.gz
+          name: gemini-cli-dist-${{ steps.build_script.outputs.GEMINI_VERSION }}
+          path: gemini-cli-dist.tgz
