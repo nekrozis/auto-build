@@ -33,4 +33,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          path: gemini-cli-dist-${{ steps.build_script.outputs.GEMINI_VERSION }}.tgz
+          name: gemini-cli-dist-${{ steps.build_script.outputs.GEMINI_VERSION }}
+          path: gemini-cli-dist.tgz

@@ -10,6 +10,7 @@ import shutil
 # ================= Configuration =================
 GEMINI_REPO = "google-gemini/gemini-cli"
 VSCODE_API_URL = "https://update.code.visualstudio.com/api/update/win32-x64-archive/stable/latest"
+OUTPUT_FILENAME = "gemini-cli-dist.tgz"
 # =================================================
 
 def set_github_output(key, value):
@@ -124,7 +125,8 @@ def generate_package_json(output_dir, gemini_ver, pty_ver):
         "version": gemini_ver,
         "bin": {"gemini": "gemini.js"},
         "dependencies": {
-            "node-pty": "{pty_ver}"
+            # Use GitHub reference to ensure the correct native build is installed later
+            "node-pty": f"github:microsoft/node-pty#v{pty_ver}"
         },
     }
 
@@ -150,8 +152,7 @@ def main():
             set_github_output("VSCODE_VERSION", vscode_ver)
             set_github_output("NODEPTY_VERSION", pty_ver)
 
-            output_filename = f"gemini-cli-dist-{gemini_ver}.tgz"
-            output_path = os.path.join(os.getcwd(), output_filename)
+            output_path = os.path.join(os.getcwd(), OUTPUT_FILENAME)
             pack_tgz(work_dir, output_path)
 
             print("\n" + "=" * 30)
