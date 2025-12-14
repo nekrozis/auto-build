@@ -1,10 +1,11 @@
 import os
 import json
 import requests
-import zipfile
 import tarfile
 import tempfile
 import sys
+import subprocess
+import shutil
 
 # ================= Configuration =================
 GEMINI_REPO = "google-gemini/gemini-cli"
@@ -51,7 +52,7 @@ def get_gemini_cli(repo_slug, save_dir):
     return version
 
 def get_vscode_node_pty(extract_root):
-    """Download VS Code archive and extract bundled node-pty"""
+    """Download VS Code archive and extract bundled node-pty using system 'unzip'."""
     print("[-] Checking latest VS Code version...")
 
     resp = requests.get(VSCODE_API_URL)
@@ -66,40 +67,53 @@ def get_vscode_node_pty(extract_root):
 
     node_pty_ver = "0.0.0"
     target_dir = os.path.join(extract_root, "node_modules", "node-pty")
+    zip_path = os.path.join(extract_root, "vscode.zip")
 
+    # 1. Download ZIP file
     with requests.get(download_url, stream=True) as r:
         r.raise_for_status()
-        with tempfile.TemporaryFile() as tmp_file:
+        with open(zip_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=1024 * 1024):
-                tmp_file.write(chunk)
+                f.write(chunk)
 
-            print("[-] Extracting node-pty...")
-            tmp_file.seek(0)
+    print("[-] Extracting node-pty using 'unzip' command...")
 
-            with zipfile.ZipFile(tmp_file) as z:
-                members = [
-                    m for m in z.namelist()
-                    if "resources/app/node_modules/node-pty/" in m
-                ]
-                if not members:
-                    raise Exception("node-pty not found in VS Code archive")
+    # 2. Extract specific path using 'unzip' system command
+    try:
+        # Corrected prefix based on user's 'tar tf' output (no top-level folder)
+        zip_member_prefix = "resources/app/node_modules/node-pty/*"
+        
+        subprocess.run([
+            "unzip", "-q", zip_path, zip_member_prefix, "-d", extract_root
+        ], check=True)
 
-                for member in members:
-                    split_path = member.split("node_modules/node-pty/")
-                    if len(split_path) < 2 or not split_path[1]:
-                        continue
+    except subprocess.CalledProcessError as e:
+        raise Exception(f"Unzip command failed to extract node-pty: {e}")
 
-                    rel_path = split_path[1]
-                    dest_file_path = os.path.join(target_dir, rel_path)
-                    os.makedirs(os.path.dirname(dest_file_path), exist_ok=True)
+    # 3. Move extracted contents to the expected location
+    unzip_source_dir = os.path.join(extract_root, "resources", "app", "node_modules", "node-pty")
+    
+    os.makedirs(target_dir, exist_ok=True)
+    
+    if not os.path.exists(unzip_source_dir):
+        raise Exception(f"Extracted node-pty directory not found at: {unzip_source_dir}")
 
-                    content = z.read(member)
-                    with open(dest_file_path, "wb") as f:
-                        f.write(content)
+    for item in os.listdir(unzip_source_dir):
+        src = os.path.join(unzip_source_dir, item)
+        dst = os.path.join(target_dir, item)
+        shutil.move(src, dst)
+        
+    shutil.rmtree(os.path.join(extract_root, "resources"))
+    os.remove(zip_path)
 
-                    if rel_path == "package.json":
-                        pkg = json.loads(content)
-                        node_pty_ver = pkg.get("version", "0.0.0")
+    # 4. Read node-pty version from package.json
+    try:
+        package_json_path = os.path.join(target_dir, "package.json")
+        with open(package_json_path, "r", encoding="utf-8") as f:
+            pkg = json.load(f)
+            node_pty_ver = pkg.get("version", "0.0.0")
+    except Exception as e:
+        print(f"[Warning] Could not read node-pty package.json: {e}")
 
     print(f"[√] node-pty version: {node_pty_ver}")
     return vscode_ver, node_pty_ver
@@ -111,7 +125,7 @@ def generate_package_json(output_dir, gemini_ver, pty_ver):
         "version": gemini_ver,
         "bin": {"gemini": "gemini.js"},
         "dependencies": {
-            "node-pty": f"github:microsoft/node-pty#v{pty_ver}"
+            "node-pty": pty_ver
         },
     }
 
@@ -150,6 +164,8 @@ def main():
 
     except Exception as e:
         print(f"[!] Error: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 if __name__ == "__main__":
