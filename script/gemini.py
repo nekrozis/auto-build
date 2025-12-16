@@ -9,9 +9,12 @@ import shutil
 
 # ================= Configuration =================
 GEMINI_REPO = "google-gemini/gemini-cli"
-VSCODE_API_URL = "https://update.code.visualstudio.com/api/update/win32-x64-archive/stable/latest"
+VSCODE_API_URL = (
+    "https://update.code.visualstudio.com/api/update/win32-x64-archive/stable/latest"
+)
 OUTPUT_FILENAME = "gemini-cli-dist.tgz"
 # =================================================
+
 
 def set_github_output(key, value):
     """Write output variables for GitHub Actions"""
@@ -19,6 +22,7 @@ def set_github_output(key, value):
     if "GITHUB_OUTPUT" in os.environ:
         with open(os.environ["GITHUB_OUTPUT"], "a") as f:
             f.write(f"{key}={value}\n")
+
 
 def get_gemini_cli(repo_slug, save_dir):
     print(f"[-] Fetching latest release of {repo_slug}...")
@@ -51,6 +55,7 @@ def get_gemini_cli(repo_slug, save_dir):
 
     return version
 
+
 def get_vscode_node_pty(extract_root):
     """Download VS Code archive and extract bundled node-pty using system 'unzip'."""
     print("[-] Checking latest VS Code version...")
@@ -60,7 +65,9 @@ def get_vscode_node_pty(extract_root):
     ver_data = resp.json()
 
     vscode_ver = ver_data.get("name") or ver_data.get("productVersion")
-    download_url = f"https://update.code.visualstudio.com/{vscode_ver}/win32-x64-archive/stable"
+    download_url = (
+        f"https://update.code.visualstudio.com/{vscode_ver}/win32-x64-archive/stable"
+    )
 
     print(f"[√] VS Code version: {vscode_ver}")
     print("[-] Downloading VS Code archive...")
@@ -82,27 +89,31 @@ def get_vscode_node_pty(extract_root):
     try:
         # Corrected prefix based on user's 'tar tf' output (no top-level folder)
         zip_member_prefix = "resources/app/node_modules/node-pty/*"
-        
-        subprocess.run([
-            "unzip", "-q", zip_path, zip_member_prefix, "-d", extract_root
-        ], check=True)
+
+        subprocess.run(
+            ["unzip", "-q", zip_path, zip_member_prefix, "-d", extract_root], check=True
+        )
 
     except subprocess.CalledProcessError as e:
         raise Exception(f"Unzip command failed to extract node-pty: {e}")
 
     # 3. Move extracted contents to the expected location
-    unzip_source_dir = os.path.join(extract_root, "resources", "app", "node_modules", "node-pty")
-    
+    unzip_source_dir = os.path.join(
+        extract_root, "resources", "app", "node_modules", "node-pty"
+    )
+
     os.makedirs(target_dir, exist_ok=True)
-    
+
     if not os.path.exists(unzip_source_dir):
-        raise Exception(f"Extracted node-pty directory not found at: {unzip_source_dir}")
+        raise Exception(
+            f"Extracted node-pty directory not found at: {unzip_source_dir}"
+        )
 
     for item in os.listdir(unzip_source_dir):
         src = os.path.join(unzip_source_dir, item)
         dst = os.path.join(target_dir, item)
         shutil.move(src, dst)
-        
+
     shutil.rmtree(os.path.join(extract_root, "resources"))
     os.remove(zip_path)
 
@@ -118,25 +129,27 @@ def get_vscode_node_pty(extract_root):
     print(f"[√] node-pty version: {node_pty_ver}")
     return vscode_ver, node_pty_ver
 
+
 def generate_package_json(output_dir, gemini_ver, pty_ver):
     print("[-] Generating package.json...")
     pkg = {
         "name": "gemini-cli",
         "version": gemini_ver,
+        "type": "module",
         "bin": {"gemini": "gemini.js"},
-        "dependencies": {
-            "node-pty": pty_ver
-        },
+        "dependencies": {"node-pty": pty_ver},
     }
 
     with open(os.path.join(output_dir, "package.json"), "w", encoding="utf-8") as f:
         json.dump(pkg, f, indent=2)
+
 
 def pack_tgz(source_dir, filename):
     print(f"[-] Packing archive: {filename}")
     with tarfile.open(filename, "w:gz") as tar:
         tar.add(source_dir, arcname=".")
     print("[√] Archive created.")
+
 
 def main():
     try:
@@ -165,8 +178,10 @@ def main():
     except Exception as e:
         print(f"[!] Error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
