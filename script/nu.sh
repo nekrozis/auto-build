@@ -26,7 +26,7 @@ codegen-units = 1
 rpath = false
 EOF
 
-rm -rf ./.cargo/ && ls -al
+rm -rf ./.cargo/ && rm -rf rust-toolchain.toml && ls -al
 
 cargo fetch --locked --target x86_64-pc-windows-msvc
 cargo build --profile makepkg --frozen
