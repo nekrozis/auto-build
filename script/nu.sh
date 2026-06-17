@@ -26,11 +26,10 @@ codegen-units = 1
 rpath = false
 EOF
 
-rm -rf ./.cargo/ && rm -rf rust-toolchain.toml && ls -al
+rm -rf ./.cargo/ && ls -al
 
 cargo fetch --locked --target x86_64-pc-windows-msvc
 cargo build --profile makepkg --frozen
 
-strip --strip-all target/makepkg/*.exe
 mkdir ../release
 cp target/makepkg/*.exe ../release/
