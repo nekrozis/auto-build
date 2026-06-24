@@ -37,6 +37,7 @@ jobs:
       run: |
         VSROOT=$(vswhere -latest -property installationPath)
         VCVARSALL="$VSROOT\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        rm -rf "C:/Program Files/OpenSSL/"
         echo "VCVARSALL=$VCVARSALL" >> $GITHUB_ENV
 
     - name: "Build Aseprite (Release + Full Optimization)"
