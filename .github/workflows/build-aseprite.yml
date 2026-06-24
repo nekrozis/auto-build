@@ -49,6 +49,8 @@ jobs:
         cmake -G Ninja ^
           -DCMAKE_BUILD_TYPE=Release ^
           -DLAF_BACKEND=skia ^
+          -DENABLE_UPDATER=OFF ^
+          -DENABLE_NEWS=OFF ^
           -DSKIA_DIR=${{ github.workspace }}\skia ^
           -DSKIA_LIBRARY_DIR=${{ github.workspace }}\skia\out\Release-x64 ^
           -DSKIA_LIBRARY=${{ github.workspace }}\skia\out\Release-x64\skia.lib ^
