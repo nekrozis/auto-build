@@ -74,6 +74,15 @@ jobs:
         cp -r ${{ github.workspace }}\aseprite\build\bin\data\ .
         # ${{ github.workspace }}\radare2\bin\r2.bat -e bin.relocs.apply=true -q -w -c '/x 6c 69 62 63 72 79 70 74 6f 2d 31 5f 31 2d 78 36 34 2e 64 6c 6c; wx 6c 69 62 63 72 79 70 74 6f 2e 64 6c 6c 00 00 00 00 00 00 00 00 @ hit0_0' ${{ github.workspace }}\release\aseprite.exe
 
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: UCRT64
+        update: false
+    
+    - name: ldd dynamic libs 
+      shell: msys2 {0}
+      run: |
+        ldd release/aseprite.exe
 
     - name: "Upload Build Artifacts"
       uses: actions/upload-artifact@v4
