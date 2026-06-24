@@ -32,10 +32,17 @@ jobs:
         git checkout ${{ github.event.inputs.version }}
         git submodule update --init --recursive
 
+    - name: Locate Visual Studio 
+      shell: bash
+      run: |
+        VSROOT=$(vswhere -latest -property installationPath)
+        VCVARSALL="$VSROOT\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        echo "VCVARSALL=$VCVARSALL" >> $GITHUB_ENV
+
     - name: "Build Aseprite (Release + Full Optimization)"
       run: |
         del /F /Q C:\Windows\System32\libcrypto-1_1-x64.dll
-        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=x64
+        call "%VCVARSALL%" x64
         cd aseprite
         mkdir build
         cd build
