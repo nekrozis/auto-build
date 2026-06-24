@@ -41,7 +41,7 @@ jobs:
 
     - name: "Build Aseprite (Release + Full Optimization)"
       run: |
-        del /F /Q C:\Windows\System32\libcrypto-1_1-x64.dll
+        del /F /Q C:\Windows\System32\libcrypto-3-x64.dll
         call "%VCVARSALL%" x64
         cd aseprite
         mkdir build
